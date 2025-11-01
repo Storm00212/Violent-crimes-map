@@ -1,73 +1,106 @@
-# React + TypeScript + Vite
+# Kenya Violent Crimes Map
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An interactive React application that visualizes violent crime data across Kenya's counties using an interactive map. The app parses crime data from an Excel file and displays it as a choropleth map with filtering and export capabilities.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Interactive Map**: Choropleth visualization of Kenya's counties with crime intensity
+- **Data Parsing**: Automatically parses Excel data containing crime statistics by county
+- **Filtering**: Filter by year, crime type, and search counties
+- **Hover Tooltips**: Detailed crime statistics on hover
+- **Data Export**: Export filtered data as CSV
+- **Responsive Design**: Clean, modern UI built with Tailwind CSS
+- **Type Safety**: Built with TypeScript for reliability
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **React 18** with TypeScript
+- **Vite** for fast development and building
+- **Leaflet & React-Leaflet** for interactive mapping
+- **XLSX** for Excel file parsing
+- **Tailwind CSS** for styling
+- **Kenya Counties GeoJSON** for map boundaries
 
-## Expanding the ESLint configuration
+## Prerequisites
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Node.js (version 16 or higher)
+- npm or yarn
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Installation
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd violent-crimes-map
+   ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Place the Excel data file:
+   - Copy your `Governance-Peace-and-Security.xlsx` file to the `public/` directory
+
+## Running the Application
+
+1. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+2. Open your browser and navigate to `http://localhost:5173`
+
+## Data Structure
+
+The application expects an Excel file with crime data organized by county and year. The data should include:
+- County names
+- Year of data
+- Male and female offender counts
+- Total crime incidents
+
+## Features Overview
+
+### Map Visualization
+- Counties are colored based on crime intensity (darker = higher crime rates)
+- Hover over counties to see detailed statistics
+- Zoom and pan controls for navigation
+
+### Filtering Options
+- **Year Selection**: Choose from available years (2019-2023)
+- **Crime Type**: Filter by total crimes, male offenders, or female offenders
+- **County Search**: Search and highlight specific counties
+
+### Data Export
+- Export current filtered data as CSV file
+- Includes county name, year, and crime statistics
+
+## Building for Production
+
+```bash
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The built files will be in the `dist/` directory.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Project Structure
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src/
+├── components/
+│   ├── CrimeMap.tsx      # Main map component
+│   ├── Filters.tsx       # Filtering controls
+│   ├── Legend.tsx        # Map legend
+│   └── ExportButton.tsx  # Data export functionality
+├── types.ts              # TypeScript type definitions
+├── App.tsx               # Main application component
+└── index.css             # Global styles with Tailwind
+```
+
+## Data Source
+
+Crime data is sourced from the Kenya National Police Service statistics. The application uses county-level aggregation from the provided Excel file.
+
+## License
+
+This project is for educational and informational purposes. Please ensure compliance with data usage policies and local regulations.
