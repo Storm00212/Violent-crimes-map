@@ -3,7 +3,8 @@ import * as XLSX from 'xlsx'
 import CrimeMap from './components/CrimeMap'
 import Filters from './components/Filters'
 import Legend from './components/Legend'
-import { CrimeData } from './types'
+import ExportButton from './components/ExportButton'
+import type { CrimeData } from './types'
 
 function App() {
   const [crimeData, setCrimeData] = useState<CrimeData[]>([])
@@ -30,7 +31,7 @@ function App() {
         let currentYear = 0
 
         for (let i = 0; i < jsonData.length; i++) {
-          const row = jsonData[i] as any[]
+          const row = jsonData[i] as unknown[]
 
           if (row[0] && typeof row[0] === 'string' && row[0].includes('2019')) {
             currentYear = 2019
@@ -65,9 +66,9 @@ function App() {
               row[0] !== 'Railways¹' && currentYear > 0) {
 
             const county = row[0].trim()
-            const male = parseInt(row[1]) || 0
-            const female = parseInt(row[2]) || 0
-            const total = parseInt(row[3]) || 0
+            const male = parseInt(String(row[1])) || 0
+            const female = parseInt(String(row[2])) || 0
+            const total = parseInt(String(row[3])) || 0
 
             parsedData.push({
               county,
@@ -83,6 +84,7 @@ function App() {
         setFilteredData(parsedData.filter(d => d.year === selectedYear))
       } catch (error) {
         console.error('Error loading Excel data:', error)
+        // Handle error gracefully - could show user-friendly message
       }
     }
 
@@ -126,12 +128,13 @@ function App() {
               onSearchChange={setSearchTerm}
               availableYears={[2019, 2020, 2021, 2022, 2023]}
             />
+            <ExportButton data={filteredData} selectedYear={selectedYear} />
             <Legend />
           </div>
 
           <div className="lg:col-span-3">
             <div className="bg-white rounded-lg shadow-sm p-4">
-              <CrimeMap data={filteredData} />
+              <CrimeMap data={filteredData} selectedYear={selectedYear} />
             </div>
           </div>
         </div>
