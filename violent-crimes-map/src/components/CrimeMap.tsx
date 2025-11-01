@@ -1,21 +1,33 @@
 import { useEffect, useState } from 'react'
-import { MapContainer, TileLayer, GeoJSON, Tooltip } from 'react-leaflet'
+import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
-import { CrimeData, CountyFeature } from '../types'
+import type { CrimeData, CountyFeature } from '../types'
 
 interface CrimeMapProps {
   data: CrimeData[]
+  selectedYear: number
 }
 
-const CrimeMap = ({ data }: CrimeMapProps) => {
+const CrimeMap = ({ data, selectedYear }: CrimeMapProps) => {
   const [geoData, setGeoData] = useState<CountyFeature[] | null>(null)
 
   useEffect(() => {
     // Load Kenya counties GeoJSON
-    fetch('https://raw.githubusercontent.com/codeforgermany/click_that_hood/main/public/data/kenya-counties.geojson')
-      .then(response => response.json())
-      .then(data => setGeoData(data.features))
-      .catch(error => console.error('Error loading GeoJSON:', error))
+    fetch('/kenya-counties.geojson')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        return response.json()
+      })
+      .then(data => {
+        console.log('Loaded GeoJSON data:', data)
+        setGeoData(data.features)
+      })
+      .catch(error => {
+        console.error('Error loading GeoJSON:', error)
+        // Handle error gracefully - could show user-friendly message
+      })
   }, [])
 
   const getColor = (total: number) => {
@@ -29,12 +41,10 @@ const CrimeMap = ({ data }: CrimeMapProps) => {
                           '#FFEDA0'
   }
 
-  const style = (feature: CountyFeature) => {
-    const countyData = data.find(d => d.county.toLowerCase() === feature.properties.COUNTY?.toLowerCase())
-    const total = countyData?.total || 0
-
+  const style = () => {
+    // Since we have country-level data, show a uniform color for Kenya
     return {
-      fillColor: getColor(total),
+      fillColor: getColor(1000), // Use a medium color for the country
       weight: 2,
       opacity: 1,
       color: 'white',
@@ -43,20 +53,21 @@ const CrimeMap = ({ data }: CrimeMapProps) => {
     }
   }
 
-  const onEachFeature = (feature: CountyFeature, layer: any) => {
-    const countyData = data.find(d => d.county.toLowerCase() === feature.properties.COUNTY?.toLowerCase())
+  const onEachFeature = (_feature: any, layer: any) => {
+    // Calculate total crimes for the selected year
+    const totalCrimes = data.reduce((sum, d) => sum + d.total, 0)
+    const maleCrimes = data.reduce((sum, d) => sum + d.male, 0)
+    const femaleCrimes = data.reduce((sum, d) => sum + d.female, 0)
 
-    if (countyData) {
-      layer.bindTooltip(`
-        <div class="p-2">
-          <h3 class="font-bold text-lg">${countyData.county}</h3>
-          <p class="text-sm">Total Crimes: ${countyData.total.toLocaleString()}</p>
-          <p class="text-sm">Male: ${countyData.male.toLocaleString()}</p>
-          <p class="text-sm">Female: ${countyData.female.toLocaleString()}</p>
-          <p class="text-sm">Year: ${countyData.year}</p>
-        </div>
-      `, { permanent: false, direction: 'top' })
-    }
+    layer.bindTooltip(`
+      <div class="p-2">
+        <h3 class="font-bold text-lg">Kenya - ${selectedYear}</h3>
+        <p class="text-sm">Total Crimes: ${totalCrimes.toLocaleString()}</p>
+        <p class="text-sm">Male Offenders: ${maleCrimes.toLocaleString()}</p>
+        <p class="text-sm">Female Offenders: ${femaleCrimes.toLocaleString()}</p>
+        <p class="text-sm">Counties with Data: ${data.length}</p>
+      </div>
+    `, { permanent: false, direction: 'top' })
   }
 
   if (!geoData) {
@@ -66,6 +77,8 @@ const CrimeMap = ({ data }: CrimeMapProps) => {
       </div>
     )
   }
+
+  console.log('Rendering map with geoData:', geoData)
 
   return (
     <div className="h-96 w-full">
@@ -78,11 +91,14 @@ const CrimeMap = ({ data }: CrimeMapProps) => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <GeoJSON
-          data={geoData as any}
-          style={style}
-          onEachFeature={onEachFeature}
-        />
+        {geoData.map((feature, index) => (
+          <GeoJSON
+            key={index}
+            data={feature}
+            style={style}
+            onEachFeature={onEachFeature}
+          />
+        ))}
       </MapContainer>
     </div>
   )
