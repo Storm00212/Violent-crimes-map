@@ -10,7 +10,7 @@ export interface CountyFeature {
   type: 'Feature'
   properties: {
     COUNTY: string
-    [key: string]: any
+    [key: string]: unknown
   }
   geometry: {
     type: string
